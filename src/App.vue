@@ -15,7 +15,7 @@ export default {
 
 <style>
 body {
-  /* background: #333; */
+  background: #333;
   padding: 0;
   margin: 0;
   overflow: hidden;

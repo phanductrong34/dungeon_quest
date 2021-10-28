@@ -1,5 +1,6 @@
 /*  input config 
 {   src,
+    spiteName
     gameObject,
     animation, 
     currentAnimation, 
@@ -19,58 +20,81 @@ drawImage(
 )
 */
 
-//
-class Sprite{
-    constructor(config){
-        // tức là tạo ra một object ảnh và khi nó load xong thì tạo property isLoaded
-        this.image = new Image();
-          this.image.src = config.src
-        this.image.onload = ()=>{
-            this.isLoaded = true;
-        }
 
-        //Shadow
-        this.shadow = new Image();
-        this.useShadow = true; // config.useShadow || false
-        if(this.useShadow){
-            this.shadow.src = "../assets/images/characters/shadow.png";
-        }
-        this.shadow.onload = () => {
-            this.isShadowLoaded = true;
-        }
-
-        //Configure Animation and initial state
-        this.animation = config.animation || {
-            idleDown: [
-                [0,0]
-            ]
-        };
-        this.currentAnimation = config.currentAnimation || "idleDown";
-        this.currentAnimationFrame = 0;
-
-        // Refence the game object
-        this.gameObject = config.gameObject
+const spriteSrc = {
+    hero : {
+        src: "../assets/png/character/knight_f_idle_anim_f0.png",
+        offset: [8,-5]
+    },
+    box : {
+        src: "../assets/png/obstacle/crate.png",
+        offset: [8,1]
+    },
+    spike : {
+        src: "../assets/png/obstacle/floor_spikes_anim_f3.png",
+        offset: [8,8]
+    },
+    redMon: {
+        src: "../assets/png/monster/chort_idle_anim_f0.png",
+        offset: [8,-1]
+    },
+    greenMon: {
+        src: "../assets/png/monster/swampy_idle_anim_f0.png",
+        offset: [8,7]
+    },
+    whiteMon: {
+        src: "../assets/png/monster/zombie_idle_anim_f0.png",
+        offset: [8,7]
+    },
+    sword:{
+        src: "../assets/png/sword/weapon_red_gem_sword.png",
+        offset: [11,0]
     }
 
-    //METHOD
-    draw(ctx) {
-        // chỉ vẽ đc png lên canvas nếu nó đã được load lên web, nên mới cần các biến isLoaded
-        const x = this.gameObject.x * 16 - 8;
-        const y = this.gameObject.y * 16 - 18;
 
-        //vẽ shadow
-        this.isShadowLoaded && ctx.drawImage(this.shadow,x,y);
-        
-        //vẽ object ấy
-        this.isLoaded && ctx.drawImage(this.image,
+}
+
+
+class Sprite {
+    constructor(config) {
+  
+      //Set up the image
+      this.image = new Image();
+      this.offsetX = spriteSrc[config.spriteName]['offset'][0]
+      this.offsetY = spriteSrc[config.spriteName]['offset'][1]
+      this.image.src = spriteSrc[config.spriteName].src;
+      this.image.onload = () => {
+          this.isLoaded = true;
+        }
+  
+  
+      //Configure Animation & Initial State
+      this.animations = config.animations || {
+        idleDown: [
+          [0,0]
+        ]
+      }
+      this.currentAnimation = config.currentAnimation || "idleDown";
+      this.currentAnimationFrame = 0;
+  
+      //Reference the game object
+      this.gameObject = config.gameObject;
+    }
+  
+    draw(ctx) {
+
+      const x = this.gameObject.x + this.offsetX;
+      const y = this.gameObject.y + this.offsetY;
+  
+      this.isShadowLoaded && ctx.drawImage(this.shadow, x, y);
+  
+      this.isLoaded && ctx.drawImage(this.image,
         0,0,
         32,32,
         x,y,
         32,32
-        )
-
-        
+      )
     }
-}
+  }
 
 export default Sprite

@@ -1,6 +1,6 @@
 <template>
   <div ref="gameContainer" class="game-container">
-    <canvas ref="canvas" class="game-canvas" width="352" height="198"></canvas>
+    <canvas ref="canvas" class="game-canvas" width="200" height="200"></canvas>
   </div>
 </template>
 
@@ -34,8 +34,8 @@ export default {
 <style scoped>
 .game-container {
   position: relative; 
-  width: 352px;
-  height: 198px;
+  width: 200px;
+  height: 200px;
   margin: 0 auto;
   outline: 1px solid #fff;
 
