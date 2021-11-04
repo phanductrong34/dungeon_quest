@@ -22,30 +22,31 @@ class Overworld {
    this.map = null; //ban đầu khởi tạo bằng 0, sau đó khi init sẽ gán 1 Overworldmap và chạy hàm loop để vẽ
  }
 
+
+//Hàm tổng, chạy lại sau mỗi frame, làm nhiệm vụ vẽ lại toàn bộ canvas: vẽ nền và các gameObject
+// chạy hàm update lên tất cả gameObject trước khi vẽ lại lên canvas để thay đổi, và biến truyền vào là directionInput thay đổi liên tục trường direction do gắn event vào cửa sổ
+// ở đây chỉ có Person là chạy được hàm update(state)
+
  startGameLoop(){
-   const step = ()=>{
-    this.ctx.clearRect(0, 0,this.canvas.width, this.canvas.height);
+    const step = ()=>{
+      this.ctx.clearRect(0, 0,this.canvas.width, this.canvas.height);
+      
 
-     // Draw Lower Layer
-    this.map.drawLowerImage(this.ctx)
+      // Draw Lower Layer
+      this.map.drawLowerImage(this.ctx)
 
-    // Draw GameObject
-    Object.values(this.map.gameObject).forEach(object=>{
-      // object.x += 1;
-
-      // truyền hướng vào để vẽ lại tọa độ của object khi có input direction, nếu obj là Person thì mới đc, còn ko thì ko có gì 
-      object.update({
-        arrow: this.directionInput.direction
+      // Draw GameObject
+      Object.values(this.map.gameObject).forEach(object=>{;
+        object.update({
+          arrow: this.directionInput.direction,
+          map: this.map
+        })
+        object.sprite.draw(this.ctx)
       })
-      object.sprite.draw(this.ctx)
-    })
 
-    // //Draw Upper Layer
-    // this.map.drawUpperImage(this.ctx);
-
-     requestAnimationFrame(()=>{
-       step()
-      })
+      requestAnimationFrame(()=>{
+        step()
+        })
    }
    step();
  }
@@ -54,6 +55,10 @@ class Overworld {
   const store = useStore();
   const curMap = store.getters['map/getMap']('DemoRoom')
   this.map = new OverworldMap(curMap);
+
+  // tạo wall trước khi vẽ bất cứ thứ gì
+  this.map.mountedObject();
+
 
   // Khởi tạo class nhận input
   this.directionInput = new DirectionInput();

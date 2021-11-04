@@ -13,23 +13,38 @@ const moduleMap = {
             gameObject: [
               {
                 name: "hero",
-                x: 1,
-                y: 3,
+                x: 4,
+                y: 4,
               },
               {
                 name: "box",
-                x: 1,
-                y: 2,
+                x: 3,
+                y: 6,
+              },
+              {
+                name: "box",
+                x: 4,
+                y: 6,
+              },
+              {
+                name: "box",
+                x: 5,
+                y: 6,
               },
               {
                 name: "spike",
-                x: 1,
-                y: 1,
+                x: 3,
+                y: 4,
               },
               {
                 name: "redMon",
-                x: 1,
-                y: 4,
+                x: 4,
+                y: 2,
+              },
+              {
+                name: "greenMon",
+                x: 5,
+                y: 3,
               }
             ]
         }

@@ -23,7 +23,7 @@ drawImage(
 
 const spriteSrc = {
     hero : {
-        src: "../assets/png/character/knight_f_idle_anim_f0.png",
+        src: "../assets/png/character/knight.png",
         offset: [8,-5]
     },
     box : {
@@ -50,51 +50,40 @@ const spriteSrc = {
         src: "../assets/png/sword/weapon_red_gem_sword.png",
         offset: [11,0]
     }
-
-
 }
 
+import _ from 'lodash';
 
 class Sprite {
     constructor(config) {
-  
-      //Set up the image
-      this.image = new Image();
-      this.offsetX = spriteSrc[config.spriteName]['offset'][0]
-      this.offsetY = spriteSrc[config.spriteName]['offset'][1]
-      this.image.src = spriteSrc[config.spriteName].src;
-      this.image.onload = () => {
-          this.isLoaded = true;
-        }
-  
-  
-      //Configure Animation & Initial State
-      this.animations = config.animations || {
-        idleDown: [
-          [0,0]
-        ]
-      }
-      this.currentAnimation = config.currentAnimation || "idleDown";
-      this.currentAnimationFrame = 0;
-  
-      //Reference the game object
-      this.gameObject = config.gameObject;
-    }
-  
-    draw(ctx) {
+    
+        //Set up the image
+        this.image = new Image();
+        this.offsetX = spriteSrc[config.spriteName]['offset'][0]
+        this.offsetY = spriteSrc[config.spriteName]['offset'][1]
+        this.image.src = spriteSrc[config.spriteName].src;
+        this.image.onload = () => {
+            this.isLoaded = true;
+          }
+        //Reference the game object
+        this.gameObject = config.gameObject;
 
+  }
+
+
+  draw(ctx) {
       const x = this.gameObject.x + this.offsetX;
       const y = this.gameObject.y + this.offsetY;
-  
-      this.isShadowLoaded && ctx.drawImage(this.shadow, x, y);
-  
+
       this.isLoaded && ctx.drawImage(this.image,
         0,0,
         32,32,
         x,y,
         32,32
       )
-    }
   }
+
+
+}
 
 export default Sprite

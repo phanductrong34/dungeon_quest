@@ -20,13 +20,13 @@ class DirectionInput {
 
     init(){
         document.addEventListener('keydown', e =>{
-            console.log(e.code);
+            // console.log(e.code);
             const dir = this.map[e.code];
 
             //nếu hướng mới hợp lệ và  chưa có trong mảng thì thêm vào
             if(dir && this.heldDirections.indexOf(dir) === -1){
                 this.heldDirections.unshift(dir);
-                console.log(this.heldDirections);
+                //console.log(this.heldDirections);
             }
         });
 
