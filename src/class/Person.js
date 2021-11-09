@@ -24,6 +24,7 @@ method:
 */ 
 import GameObject from "./GameObject";
 import SpriteAnimated from "./SpriteAnimated";
+import utils from "./utils";
 
 class Person extends GameObject {
     constructor(config){
@@ -40,12 +41,14 @@ class Person extends GameObject {
             "right": ["x",1],
             "left": ["x",-1],
         }
+        this.isHit = false;
+        this.hasSword = false;
     }
 
     // update đc gọi ở vòng loop trong OverWorld, truyền vào input có trường arrow
     update(state){
         if(this.movingProgressRemaining > 0){
-            this.updatePosition();
+            this.updatePosition(state);
         }else{
             if(state.arrow){
                 this.startBehavior(state,{
@@ -63,7 +66,7 @@ class Person extends GameObject {
         this.direction = behavior.direction;
         if(behavior.type === "walk"){
             // check wall trước khi tăng biến tích lũy
-            if( state.map.isSpaceTaken(this.x, this.y,this.direction) ){
+            if( state.map.isSpaceWall(this.x, this.y,this.direction) ){
                 return;
             }
 
@@ -76,22 +79,45 @@ class Person extends GameObject {
     }
 
 
-    updatePosition(){
+    updatePosition(state){
+        if(this.isHit) return;
+
         const [property, change] = this.directionUpdate[this.direction];
         this[property] += change;
         this.movingProgressRemaining -= 1;
+
+        // check hoàn thành tiến trình đi
+        if(this.movingProgressRemaining === 0){
+            utils.emitEvent("PersonWalkingComplete", {
+                who: this,
+                map: state.map
+            })
+        }
     }
 
     //luôn chạy tại mọi frame, nhưng chỉ thay đổi khi arrow mới
     updateSprite(state){
+        let sword;
+        this.hasSword ? sword = "-sword" : sword = "";  
         
-        if(this.movingProgressRemaining > 0){
-            this.sprite.setAnimation("walk-"+ this.direction);
+        if(!this.isHit && this.movingProgressRemaining > 0){
+            this.sprite.setAnimation("walk-"+ this.direction + sword);
             return;
         }
 
-        this.sprite.setAnimation("idle-"+ this.direction);
+        else if (!this.isHit && this.movingProgressRemaining == 0){
+            this.sprite.setAnimation("idle-"+ this.direction + sword);
+        }else{
+            this.sprite.setAnimation("hit");
+        }
 
+    }
+
+    setHit(){
+        this.isHit = true;
+    }
+    pickSword(){
+        this.hasSword = true;
     }
 }
 export default Person

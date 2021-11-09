@@ -12,6 +12,11 @@ const moduleMap = {
             lowerSrc: "../assets/png/base/base-01.png",
             gameObject: [
               {
+                name: "sword",
+                x: 7,
+                y: 5,
+              },
+              {
                 name: "hero",
                 x: 4,
                 y: 4,
@@ -54,28 +59,34 @@ const moduleMap = {
   getters:{
     getMap : (state) => (name) => {
       const curMap = state.allMaps[name];
-      
+      const formatGameObject = [];
+
+      curMap.gameObject.forEach(obj => {
+        const objId = `${obj.name}_${utils.toPixels(obj.x)}_${utils.toPixels(obj.y)}`;
+        if(obj.name == "hero"){
+            formatGameObject[objId] = new Person({
+              spriteName: obj.name,
+              x: utils.toPixels(obj.x), // số nguyên đc chuyển thành tọa độ pixel qua hàm withGrid
+              y: utils.toPixels(obj.y)
+            })
+        }
+        else{
+            formatGameObject[objId] =  new GameObject({
+              spriteName: obj.name,
+              x: utils.toPixels(obj.x), // số nguyên đc chuyển thành tọa độ pixel qua hàm withGrid
+              y: utils.toPixels(obj.y)
+            })
+        }
+
+      })
+
       const sortedMap = {
         lowerSrc : curMap.lowerSrc,
-        gameObject : curMap.gameObject.sort((a,b) => a.y - b.y).map((obj)=>{
-          if(obj.name == "hero"){
-              return new Person({
-                spriteName: obj.name,
-                x: utils.toPixels(obj.x), // số nguyên đc chuyển thành tọa độ pixel qua hàm withGrid
-                y: utils.toPixels(obj.y)
-              })
-          }
-          else{
-              return new GameObject({
-                spriteName: obj.name,
-                x: utils.toPixels(obj.x), // số nguyên đc chuyển thành tọa độ pixel qua hàm withGrid
-                y: utils.toPixels(obj.y)
-              })
-          }
-        })
+        gameObject : formatGameObject
       }
       return sortedMap;
     }
+    
   },
   mutations:{
 
@@ -86,7 +97,7 @@ const moduleMap = {
 }
 
 
-export default createStore({
+export const store =  createStore({
   state: {
   },
   mutations: {

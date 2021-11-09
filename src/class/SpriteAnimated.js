@@ -13,7 +13,7 @@ drawImage(
     sy: tọa độ y bắt đầu crop, 
     swidth: chiều dài crop, 
     sheight: chiều rộng crop, 
-    x: tọa độ x trên canvas sẽ vẽ ra, 
+  x: tọa độ x trên canvas sẽ vẽ ra,
     y: tọa độ y vẽ trên canvas,
     width,
     height
@@ -22,8 +22,16 @@ drawImage(
 
 
 const spriteSrc = {
+    sword:{
+      src: "../assets/png/sword/weapon_red_gem_sword.png",
+      offset: [8,8] 
+    },
+    deadFloor: {
+      src: "../assets/png/obstacle/dead_floor.png",
+      offset: [0,0]
+    },
     hero : {
-        src: "../assets/png/character/knight.png",
+        src: "../assets/png/character/knight-02.png",
         offset: [-1,-8]
     },
     box : {
@@ -76,7 +84,18 @@ class Sprite {
         "walk-right": [[1,2], [2,2], [3,2], [0,2]],
         "walk-up": [[1,3], [2,3], [3,3], [0,3]],
         "walk-left": [[1,3], [2,3], [3,3], [0,3]],
-        "hit": [[1,4],[2,4],[3,4], [0,4]]
+        "hit": [[1,4],[2,4],[3,4], [0,4]],
+
+        "idle-down-sword": [ [1,5] , [2,5] , [3,5] , [0,5] ],
+        "idle-right-sword": [ [1,5] , [2,5] , [3,5] , [0,5] ],
+        "idle-up-sword": [ [1,6] , [2,6] , [3,6] , [0,6] ],
+        "idle-left-sword": [ [1,6] , [2,6] , [3,6] , [0,6] ],
+        "walk-down-sword": [ [1,7] , [2,7] , [3,7] , [0,7] ],
+        "walk-right-sword": [ [1,7] , [2,7] , [3,7] , [0,7] ],
+        "walk-up-sword": [ [1,8] , [2,8] , [3,8] , [0,8] ],
+        "walk-left-sword": [ [1,8] , [2,8] , [3,8] , [0,8] ],
+        "hit-left-sword": [ [1,9] , [2,9] , [3,9] , [0,9] ],
+        "hit-right-sword": [ [1,10] , [2,10] , [3,10] , [0,10] ],
 
       }
       // Initial state

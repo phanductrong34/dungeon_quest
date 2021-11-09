@@ -9,9 +9,10 @@ Cách chạy:
 */
 
 import OverworldMap from './OverworldMap' ;
-import {useStore} from 'vuex'
+import {store} from '@/store/index'
 import {ref,computed} from 'vue'
 import DirectionInput from './DirectionInput'
+import OverworldEvent from './OverworldEvent'
 
 
 class Overworld {
@@ -36,7 +37,9 @@ class Overworld {
       this.map.drawLowerImage(this.ctx)
 
       // Draw GameObject
-      Object.values(this.map.gameObject).forEach(object=>{;
+      Object.values(this.map.gameObject).sort((a,b)=>{
+        return a.y - b.y
+      }).forEach(object=>{;
         object.update({
           arrow: this.directionInput.direction,
           map: this.map
@@ -52,13 +55,15 @@ class Overworld {
  }
 
  init() {
-  const store = useStore();
   const curMap = store.getters['map/getMap']('DemoRoom')
   this.map = new OverworldMap(curMap);
-
+  this.overworldEvent = new OverworldEvent({
+    map: this.map
+  })
   // tạo wall trước khi vẽ bất cứ thứ gì
   this.map.mountedObject();
-
+  this.overworldEvent.init();
+  
 
   // Khởi tạo class nhận input
   this.directionInput = new DirectionInput();

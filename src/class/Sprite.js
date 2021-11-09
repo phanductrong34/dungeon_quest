@@ -22,6 +22,14 @@ drawImage(
 
 
 const spriteSrc = {
+    sword:{
+        src: "../assets/png/sword/weapon_red_gem_sword.png",
+        offset: [8,8] 
+    },
+    deadFloor: {
+        src: "../assets/png/obstacle/dead_floor.png",
+        offset: [8,8]
+      },
     hero : {
         src: "../assets/png/character/knight.png",
         offset: [8,-5]
