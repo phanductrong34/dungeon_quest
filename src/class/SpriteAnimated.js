@@ -1,68 +1,28 @@
-/*  input config 
-{   src,
-    spiteName
-    gameObject,
-    animation, 
-    currentAnimation, 
-    currentAnimationFrame
-}
-
-drawImage(
-    img: Image đã đc load, 
-    sx: tọa độ x bắt đầu crop, 
-    sy: tọa độ y bắt đầu crop, 
-    swidth: chiều dài crop, 
-    sheight: chiều rộng crop, 
-  x: tọa độ x trên canvas sẽ vẽ ra,
-    y: tọa độ y vẽ trên canvas,
-    width,
-    height
-)
-*/
 
 
 const spriteSrc = {
-    sword:{
-      src: "../assets/png/sword/weapon_red_gem_sword.png",
-      offset: [8,8] 
-    },
-    deadFloor: {
-      src: "../assets/png/obstacle/dead_floor.png",
-      offset: [0,0]
-    },
-    hero : {
-        src: "../assets/png/character/knight-02.png",
-        offset: [-1,-8]
-    },
-    box : {
-        src: "../assets/png/obstacle/crate.png",
-        offset: [8,1]
-    },
-    spike : {
-        src: "../assets/png/obstacle/floor_spikes_anim_f3.png",
-        offset: [8,8]
-    },
+
     redMon: {
-        src: "../assets/png/monster/chort_idle_anim_f0.png",
-        offset: [8,-1]
+        src: "../assets/png/monster/redmon.png",
+        offset: [0,-8]
     },
     greenMon: {
-        src: "../assets/png/monster/swampy_idle_anim_f0.png",
-        offset: [8,7]
+        src: "../assets/png/monster/greenmon.png",
+        offset: [0,-8]
     },
     whiteMon: {
         src: "../assets/png/monster/zombie_idle_anim_f0.png",
         offset: [8,7]
     },
-    sword:{
-        src: "../assets/png/sword/weapon_red_gem_sword.png",
-        offset: [11,0]
+    goal: {
+        src: "../assets/png/goal/goal.png",
+        offset: [-16,-20]
     }
 }
 
 import _ from 'lodash';
 
-class Sprite {
+class SpriteAnimated {
     constructor(config) {
     
         //Set up the image
@@ -75,37 +35,39 @@ class Sprite {
           }
     
       //Configure Animation & Initial State
-      this.animations = config.animations || {
-        "idle-down": [ [1,0] , [2,0] , [3,0] , [0,0] ],
-        "idle-right": [ [1,0] , [2,0] , [3,0] , [0,0] ],
-        "idle-up": [ [1,1] , [2,1] , [3,1] , [0,1] ],
-        "idle-left": [ [1,1] , [2,1] , [3,1] , [0,1] ],
-        "walk-down": [[1,2], [2,2], [3,2], [0,2]],
-        "walk-right": [[1,2], [2,2], [3,2], [0,2]],
-        "walk-up": [[1,3], [2,3], [3,3], [0,3]],
-        "walk-left": [[1,3], [2,3], [3,3], [0,3]],
-        "hit": [[1,4],[2,4],[3,4], [0,4]],
-
-        "idle-down-sword": [ [1,5] , [2,5] , [3,5] , [0,5] ],
-        "idle-right-sword": [ [1,5] , [2,5] , [3,5] , [0,5] ],
-        "idle-up-sword": [ [1,6] , [2,6] , [3,6] , [0,6] ],
-        "idle-left-sword": [ [1,6] , [2,6] , [3,6] , [0,6] ],
-        "walk-down-sword": [ [1,7] , [2,7] , [3,7] , [0,7] ],
-        "walk-right-sword": [ [1,7] , [2,7] , [3,7] , [0,7] ],
-        "walk-up-sword": [ [1,8] , [2,8] , [3,8] , [0,8] ],
-        "walk-left-sword": [ [1,8] , [2,8] , [3,8] , [0,8] ],
-        "hit-left-sword": [ [1,9] , [2,9] , [3,9] , [0,9] ],
-        "hit-right-sword": [ [1,10] , [2,10] , [3,10] , [0,10] ],
-
+      if(["redMon",'greenMon','whiteMon'].includes(config.spriteName)){
+        this.animations = config.animations || {
+          // down-right , left-up
+          "idle": [ [1,0] , [2,0] , [3,0] ,[4,0], [0,0] ],
+          "eat-right":[[2,0],[3,0]],
+          "eat-down":[[2,0],[3,0]],
+          "eat-left":[[2,1],[3,1]],
+          "eat-up":[[2,1],[3,1]],
+          "die-right": [[0,2],[1,2], [2,2], [3,2], [4,2] , [5,2]],
+          "die-down": [[0,2],[1,2], [2,2], [3,2], [4,2] , [5,2]],
+          "die-left": [[0,3],[1,3], [2,3], [3,3], [4,3] , [5,3]],
+          "die-up": [[0,3],[1,3], [2,3], [3,3], [4,3] , [5,3]],
+        }
+      }else if(config.spriteName == "goal"){
+        this.animations = config.animations || {
+          "idle": [ [1,0] ,[0,0] ]
+        }
       }
+
+
       // Initial state
-      this.currentAnimation ="idle-down" 
+      this.currentAnimation ="idle" 
       this.currentAnimationFrame = 0; 
-      this.animationFrameLimit = config.animationFrameLimit || 5;
+      this.animationFrameLimit = config.animationFrameLimit || 6;
       this.animationFrameProgress = this.animationFrameLimit;
 
       //Reference the game object
       this.gameObject = config.gameObject;
+
+      //setup crop size
+      if(config.spriteName == 'goal'){
+          this.cropSize = 64;
+      }else this.cropSize = 32
 
   }
 
@@ -114,9 +76,6 @@ class Sprite {
     return this.animations[this.currentAnimation][this.currentAnimationFrame]
   }
 
-  //method
-
-  // khi input đổi hướng, thì nó sẽ set currentAnimation và setup biến tích lũy cùng frame đầu của animation, tuy nhiên lúc này chi chạy, chỉ set initial thôi. Hàm draw mới là chạy
   setAnimation(key){
     if(this.currentAnimation !== key){
       this.currentAnimation = key;
@@ -125,10 +84,8 @@ class Sprite {
     }
   }
 
-  // hàm delay frame so với game đẻ game chạy 10 frame (theo limit) thì mới đổi sprite
-  // còn luôn chạy cùng với game
-  updateAnimationProgress(){
 
+  updateAnimationProgress(){
     if(this.animationFrameProgress > 0){
       this.animationFrameProgress -= 1;
       return;
@@ -150,10 +107,10 @@ class Sprite {
 
       const [frameX, frameY]  = this.frame; // getter
       this.isLoaded && ctx.drawImage(this.image,
-        frameX*32,frameY*32,
-        32,32,
+        frameX*this.cropSize,frameY*this.cropSize,
+        this.cropSize,this.cropSize,
         x,y,
-        32,32
+        this.cropSize,this.cropSize
       )
       this.updateAnimationProgress()
   }
@@ -161,4 +118,4 @@ class Sprite {
 
 }
 
-export default Sprite
+export default SpriteAnimated

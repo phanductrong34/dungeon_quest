@@ -2,6 +2,7 @@ import { createStore } from 'vuex'
 import GameObject  from '../class/GameObject';
 import utils from '../class/utils';
 import Person from '../class/Person';
+import ObjectAnimated from '../class/ObjectAnimated';
 
 
 const moduleMap = {
@@ -12,9 +13,19 @@ const moduleMap = {
             lowerSrc: "../assets/png/base/base-01.png",
             gameObject: [
               {
+                name: 'goal',
+                x: 5,
+                y: 0
+              },
+              {
                 name: "sword",
-                x: 7,
+                x: 4,
                 y: 5,
+              },
+              {
+                name: "sword",
+                x: 3,
+                y: 3,
               },
               {
                 name: "hero",
@@ -38,12 +49,17 @@ const moduleMap = {
               },
               {
                 name: "spike",
-                x: 3,
+                x: 2,
                 y: 4,
               },
               {
                 name: "redMon",
                 x: 4,
+                y: 2,
+              },
+              {
+                name: "redMon",
+                x: 5,
                 y: 2,
               },
               {
@@ -69,6 +85,12 @@ const moduleMap = {
               x: utils.toPixels(obj.x), // số nguyên đc chuyển thành tọa độ pixel qua hàm withGrid
               y: utils.toPixels(obj.y)
             })
+        }else if(["redMon",'greenMon','whiteMon','goal'].includes(obj.name)){
+          formatGameObject[objId] = new ObjectAnimated({
+            spriteName: obj.name,
+            x: utils.toPixels(obj.x), // số nguyên đc chuyển thành tọa độ pixel qua hàm withGrid
+            y: utils.toPixels(obj.y)
+          })
         }
         else{
             formatGameObject[objId] =  new GameObject({

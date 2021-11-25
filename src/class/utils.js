@@ -28,7 +28,26 @@ const utils = {
     emitEvent(name,detail){
         const event = new CustomEvent(name, {detail});
         document.dispatchEvent(event);
+    },
+    revertDirection(dir){
+        let res;
+        switch (dir) {
+            case 'left':
+                res = 'right';
+                break;
+            case 'right':
+                res = 'left';
+                break;
+            case 'up':
+                res = 'down';
+                break;
+            case 'down':
+                res = 'up';
+                break;
+        }
+        return res;
     }
+
 }
 
 export default utils

@@ -22,13 +22,20 @@ class GameObject {
         if(this.name == 'sword') return true;
         else return false;
     }
+    get isGoal(){
+        if(this.name == 'goal') return true;
+        else return false;
+    }
+
     mount(map){
         this.isMounted = true;
-        if(!this.isMonster && !this.isSword){
-            map.addWall(this.x, this.y)
+        if(!this.isMonster && !this.isSword && !this.isGoal){
+            map.addWall(this.x, this.y);
 
         }else if(this.isSword){
             map.addSword(this.x, this.y,this);
+        }else if(this.isGoal){
+            map.addGoal(this.x, this.y);                                         
         }else{
             map.addMonsterAndTrap(this.x,this.y,this);
         }

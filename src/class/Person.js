@@ -23,13 +23,13 @@ method:
         - sau mỗi 16frame(movingProgressRemaining) thì reset lại nếu có input
 */ 
 import GameObject from "./GameObject";
-import SpriteAnimated from "./SpriteAnimated";
+import SpritePerson from "./SpritePerson";
 import utils from "./utils";
 
 class Person extends GameObject {
     constructor(config){
         super(config);
-        this.sprite = new SpriteAnimated({
+        this.sprite = new SpritePerson({
             gameObject : this,
             spriteName: config.spriteName || 'hero'
         });
@@ -43,6 +43,7 @@ class Person extends GameObject {
         }
         this.isHit = false;
         this.hasSword = false;
+        this.isCutscenePlaying = false;
     }
 
     // update đc gọi ở vòng loop trong OverWorld, truyền vào input có trường arrow
@@ -50,11 +51,27 @@ class Person extends GameObject {
         if(this.movingProgressRemaining > 0){
             this.updatePosition(state);
         }else{
-            if(state.arrow){
+            // nếu người chơi ấn nút khi không có cutscene thì nhận
+            if( !this.isCutscenePlaying  && state.arrow){
+
+                // nếu có kiếm, check luôn bước sau
+                const nextMon = state.map.isNextSpaceMonster(this.x,this.y,state.arrow);
+                if (this.hasSword && nextMon){
+                    this.isCutscenePlaying = true;
+                    this.startBehavior(state,{
+                        type: "kill",
+                        direction: state.arrow,
+                        mon: nextMon
+                    })
+                    this.updateSprite(state)
+                    return;
+                }
+                //nếu không có kiếm, cho đi hết rồi check
                 this.startBehavior(state,{
                     type: "walk",
                     direction: state.arrow
                 })
+
             }
             //bất kể giữ arrowkey hay ko cũng updateSprite
             this.updateSprite(state)
@@ -64,6 +81,7 @@ class Person extends GameObject {
 
     startBehavior(state,behavior) {
         this.direction = behavior.direction;
+
         if(behavior.type === "walk"){
             // check wall trước khi tăng biến tích lũy
             if( state.map.isSpaceWall(this.x, this.y,this.direction) ){
@@ -74,7 +92,15 @@ class Person extends GameObject {
 
             state.map.moveWall(this.x, this.y, this.direction)
             this.movingProgressRemaining = 16;
+        }
 
+        if(behavior.type === "kill"){
+            utils.emitEvent("PersonKillMonster", {
+                who: this,
+                mon: behavior.mon,
+                map: state.map,
+                direction: this.direction
+            })
         }
     }
 
@@ -99,7 +125,11 @@ class Person extends GameObject {
     updateSprite(state){
         let sword;
         this.hasSword ? sword = "-sword" : sword = "";  
-        
+
+        if(this.isCutscenePlaying){
+            this.sprite.setAnimation("hit-"+ this.direction + sword);
+            return;
+        }
         if(!this.isHit && this.movingProgressRemaining > 0){
             this.sprite.setAnimation("walk-"+ this.direction + sword);
             return;
@@ -108,7 +138,7 @@ class Person extends GameObject {
         else if (!this.isHit && this.movingProgressRemaining == 0){
             this.sprite.setAnimation("idle-"+ this.direction + sword);
         }else{
-            this.sprite.setAnimation("hit");
+            this.sprite.setAnimation("hit-"+ this.direction);
         }
 
     }

@@ -22,6 +22,10 @@ drawImage(
 
 
 const spriteSrc = {
+    goal:{
+        src: "../assets/png/goal/treasure.png",
+        offset: [-8,-8] 
+    },
     sword:{
         src: "../assets/png/sword/weapon_red_gem_sword.png",
         offset: [8,8] 
@@ -76,6 +80,11 @@ class Sprite {
         //Reference the game object
         this.gameObject = config.gameObject;
 
+        //setup crop size
+        if(config.spriteName == 'goal'){
+            this.cropSize = 64;
+        }else this.cropSize = 32
+
   }
 
 
@@ -85,9 +94,9 @@ class Sprite {
 
       this.isLoaded && ctx.drawImage(this.image,
         0,0,
-        32,32,
+        this.cropSize,this.cropSize,
         x,y,
-        32,32
+        this.cropSize,this.cropSize
       )
   }
 

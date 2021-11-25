@@ -48,6 +48,7 @@ class Overworld {
       })
 
       requestAnimationFrame(()=>{
+        if(!this.map.isPlaying) return;
         step()
         })
    }
@@ -63,7 +64,6 @@ class Overworld {
   // tạo wall trước khi vẽ bất cứ thứ gì
   this.map.mountedObject();
   this.overworldEvent.init();
-  
 
   // Khởi tạo class nhận input
   this.directionInput = new DirectionInput();
