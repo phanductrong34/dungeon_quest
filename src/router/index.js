@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import Menu from '../views/Menu.vue'
 import Home from '../views/Home.vue'
+import Game from '../views/Game.vue'
+import Admin from '../views/Admin.vue'
 import Sprite from '../views/Sprite.vue'
 
 const routes = [
@@ -9,9 +12,19 @@ const routes = [
     component: Home
   },
   {
-    path: '/sprite',
-    name: 'Sprite',
-    component: Sprite
+    path: '/menu',
+    name: 'Menu',
+    component: Menu
+  },
+  {
+    path: '/game',
+    name: 'Game',
+    component: Game
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: Admin
   },
 
 ]
