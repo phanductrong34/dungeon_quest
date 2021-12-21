@@ -28,3 +28,25 @@
       transform: translateY(0.1rem) scale(1.01);
     }
 }
+@mixin button_fx_right {
+    transform: translateY(0) scale(1);
+    cursor: pointer;
+
+    &:hover{
+      transform: translateX(0.3rem) scale(1.02);
+    }
+    &:active{
+      transform: translateX(0.5rem) scale(1.01);
+    }
+}
+@mixin button_fx_left {
+    transform: translateY(0) scale(1);
+    cursor: pointer;
+
+    &:hover{
+      transform: translateX(-0.3rem) scale(1.02);
+    }
+    &:active{
+      transform: translateX(-0.5rem) scale(1.01);
+    }
+}
