@@ -20,6 +20,7 @@ class Overworld {
    this.element = config.element;
    this.canvas = this.element.querySelector(".game-canvas");
    this.ctx = this.canvas.getContext("2d");
+   this.mapID = config.mapID;
    this.map = null; //ban đầu khởi tạo bằng 0, sau đó khi init sẽ gán 1 Overworldmap và chạy hàm loop để vẽ
  }
 
@@ -56,7 +57,9 @@ class Overworld {
  }
 
  init() {
-  const curMap = store.getters['map/getMap']('DemoRoom')
+  //const curMap = store.getters['gameData/getMap'](this.mapID);
+  const curMap = store.getters['gameData/getMap']('id');
+
   this.map = new OverworldMap(curMap);
   this.overworldEvent = new OverworldEvent({
     map: this.map

@@ -1,7 +1,8 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import store from './store'
+import {store} from '@/store/index'
+import {onAuthStateChanged,auth} from '@/firebase/config'
 //import Toast
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
@@ -24,4 +25,16 @@ const option = {
     rtl: false,
 }
 
-createApp(App).use(store).use(router).use(Toast,option).mount('#app')
+let app
+onAuthStateChanged(auth,(_user) => {
+    if(!app){
+        app = createApp(App).use(store).use(router).use(Toast,option).mount('#app');
+    }
+    if(_user){
+        store.dispatch('setCurrentUser', {
+            user: _user
+        })
+    }
+})
+
+

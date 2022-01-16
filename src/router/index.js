@@ -4,6 +4,8 @@ import Home from '../views/Home.vue'
 import Game from '../views/Game.vue'
 import Admin from '../views/Admin.vue'
 import Sprite from '../views/Sprite.vue'
+import { useRoute } from 'vue-router'
+const route = useRoute();
 
 const routes = [
   {
@@ -17,7 +19,8 @@ const routes = [
     component: Menu
   },
   {
-    path: '/game',
+    path: '/game/:id',
+    props: true,
     name: 'Game',
     component: Game
   },

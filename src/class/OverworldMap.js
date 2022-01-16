@@ -31,7 +31,7 @@ class OverworldMap{
 
     }
     drawLowerImage(ctx){
-        ctx.drawImage(this.lowerImage, 0 ,0);
+        ctx.drawImage(this.lowerImage, 23 ,8);
     }
 
 

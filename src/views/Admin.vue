@@ -329,7 +329,7 @@ export default {
                     if(maps.value[key]){
                         formatMap.push({
                             name: maps.value[key],
-                            x: key.slice(0,2),
+                            x: key.slice(0,1),
                             y: key.slice(2)
                         })
                     }

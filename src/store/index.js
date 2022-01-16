@@ -3,81 +3,43 @@ import GameObject  from '../class/GameObject';
 import utils from '../class/utils';
 import Person from '../class/Person';
 import ObjectAnimated from '../class/ObjectAnimated';
+import getCollection from '../composables/getCollection'
+import getCollectionFilter from '../composables/getCollectionFilter'
+import getDocu from '../composables/getDoc'
 
 
-const moduleMap = {
+const moduleGameData = {
   namespaced: true,
   state:{
+      lowerSrc: "../assets/png/base/testmap.png",
+      userGameData: [],
       allMaps:{
-        DemoRoom:{
-            lowerSrc: "../assets/png/base/base-01.png",
-            gameObject: [
+        'id':{
+            gameObjects: [
               {
                 name: 'goal',
                 x: 5,
                 y: 0
               },
               {
-                name: "sword",
-                x: 4,
-                y: 5,
-              },
-              {
-                name: "sword",
-                x: 3,
-                y: 3,
-              },
-              {
-                name: "hero",
-                x: 4,
-                y: 4,
-              },
-              {
-                name: "box",
-                x: 3,
-                y: 6,
-              },
-              {
-                name: "box",
-                x: 4,
-                y: 6,
-              },
-              {
-                name: "box",
-                x: 5,
-                y: 6,
-              },
-              {
-                name: "spike",
-                x: 2,
-                y: 4,
-              },
-              {
-                name: "redMon",
-                x: 4,
-                y: 2,
-              },
-              {
-                name: "redMon",
-                x: 5,
-                y: 2,
-              },
-              {
-                name: "greenMon",
-                x: 5,
-                y: 3,
+                name: 'hero',
+                x: 1,
+                y: 1
               }
-            ]
+            ],
+            minSteps: 10,
+            maxSteps:20,
+            timeLimit: 30
         }
               
       },
   },
   getters:{
-    getMap : (state) => (name) => {
-      const curMap = state.allMaps[name];
+    getMap : (state) => (id) => {
+      const curMap = state.allMaps[id];
       const formatGameObject = [];
 
-      curMap.gameObject.forEach(obj => {
+      curMap.gameObjects.forEach(obj => {
         const objId = `${obj.name}_${utils.toPixels(obj.x)}_${utils.toPixels(obj.y)}`;
         if(obj.name == "hero"){
             formatGameObject[objId] = new Person({
@@ -103,8 +65,11 @@ const moduleMap = {
       })
 
       const sortedMap = {
-        lowerSrc : curMap.lowerSrc,
-        gameObject : formatGameObject
+        lowerSrc : state.lowerSrc,
+        gameObject : formatGameObject,
+        minSteps: curMap.minSteps,
+        maxSteps: curMap.maxSteps,
+        timeLimit: curMap.timeLimit
       }
       return sortedMap;
     }
@@ -114,19 +79,49 @@ const moduleMap = {
 
   },
   actions:{
+    async loadBaseGameData({state}){
+      if(state.allMaps.length > 0) return state.allMaps;
+     
+      const {dataArray, error : err, load} = getCollection('maps');
+      await load();
+      if(!err.value && dataArray.value.length > 0){
+        dataArray.value.forEach(map => {
+          state.allMaps[map.id] = map;
+        })
+        console.log("logggggg",state.allMaps);
+        return state.allMaps;
+      }else return [];
+    },
 
+    async loadUserGameData({state, rootState}){
+      if(state.userGameData.length > 0) return state.userGameData;
+
+      const {dataArray, error : err, load} = getCollectionFilter('records');
+      await load('userID',rootState.currentUser.id);
+      if(!err.value && dataArray.value.length > 0){
+        state.userGameData = dataArray;
+        return state.userGameData
+      }else return [];
+    }
   }
 }
 
 
 export const store =  createStore({
   state: {
+    currentUser: null,
   },
-  mutations: {
+  getter: {
+    getCurrentUser(state){
+      return state.currentUser;
+    }
   },
   actions: {
+    setCurrentUser({state},user){
+      state.currentUser = user
+    },
   },
   modules: {
-    map : moduleMap,
+    gameData : moduleGameData,
   }
 })

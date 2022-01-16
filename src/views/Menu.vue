@@ -13,7 +13,7 @@
                         <h1 class="menu_chapter">CHAPTER {{chapter}}</h1>
 
                             <div class="menu_wrapper">
-                                <div class="level_wrapper" v-for="(level,index) in pageMap" :key="level.id">
+                                <div class="level_wrapper" v-for="(level,index) in pageMap" :key="level.id" @click="startGame(level.id)">
                                     <div class="level_content">
                                         <h2 class="level_number">{{index + 1}}</h2>
                                         <span class="level_rate" v-if="maps[index].isPlayed && getStar(index) == 0">
@@ -66,18 +66,28 @@
 </template>
 
 <script>
-import {ref,computed} from 'vue'
+import {ref,computed, onMounted} from 'vue'
+import {useStore} from 'vuex'
+import {useRouter} from 'vue-router'
 export default {
     setup () {
+
+        const store = useStore();
+        const userGameData = ref([]);
+        const allMaps = ref([]);
+        const isLoadAll = ref(false);
+
+        onMounted(async()=>{
+            userGameData.value = await store.dispatch('gameData/loadUserGameData');
+            allMaps.value = await store.dispatch('gameData/loadBaseGameData');
+            isLoadAll.value = true;
+        })
+
+
         const chapter = ref("1")
-        const maps = ref([]);
-        for (let i = 0; i < 30; i ++){
-            maps.value.push({
-                id: i,
-                isPlayed: Math.round(Math.random()) == 0 ? false : true,
-                stars: Math.ceil(Math.random()*2)
-            })
-        }
+        const maps = computed(()=>{
+            return Object.values(allMaps.value);
+        })
         const page = ref(1);
         const pageMap = computed(()=>{
             const max = maps.value.length;
@@ -94,8 +104,14 @@ export default {
         }
 
 
+        //startGame
+        const router = useRouter()
+        const startGame = (id)=>{
+            router.push({name: 'Game', params: {id: id} })
+        }
 
-        return {chapter,maps,page,pageMap,getStar}
+
+        return {chapter,maps,page,pageMap,getStar,startGame}
     }
 }
 </script>

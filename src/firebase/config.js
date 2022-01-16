@@ -2,8 +2,8 @@ import {initializeApp} from 'firebase/app'
 import {getAuth,createUserWithEmailAndPassword,
   signInWithEmailAndPassword,onAuthStateChanged,signOut,
   updateProfile} from 'firebase/auth'
-import {getFirestore, doc, setDoc, addDoc,collection,
-        serverTimestamp} from 'firebase/firestore'
+import {getFirestore, doc, setDoc, addDoc,collection,getDoc,getDocs,orderBy,
+        serverTimestamp, where} from 'firebase/firestore'
 
 
 const firebaseConfig = {
@@ -40,5 +40,5 @@ const db = getFirestore();
 
 
 export {auth,createUserWithEmailAndPassword,signInWithEmailAndPassword,onAuthStateChanged,signOut,updateProfile,
-    db,doc,collection, setDoc, addDoc,serverTimestamp}
+    db,doc,collection, setDoc, addDoc,serverTimestamp,getDoc,getDocs,orderBy,where}
 

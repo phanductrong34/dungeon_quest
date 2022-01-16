@@ -2,8 +2,8 @@
   <div class="title" v-if="loadUser">
     <img class="name" src="@/assets/images/title.png" alt="">
     <div class="nav" v-if="user">
-      <router-link class="nav-button" :to="{name : 'Game'}">
-        <h1 class="nav-content">Continue</h1>
+      <router-link class="nav-button" :to="{name : 'Menu'}">
+        <h1 class="nav-content">Start</h1>
         <img class="nav-img" src="@/assets/images/button-2.png" alt="">
       </router-link>
       <div class="nav-button">
@@ -51,17 +51,21 @@
 </template>
 
 <script>
-import {ref, watch, watchEffect} from 'vue'
+import {ref, watch, watchEffect,onMounted} from 'vue'
 import getUser from '@/composables/getUser'
 import useSignup from '@/composables/useSignup'
 import useLogin from '@/composables/useLogin'
 import useLogout from '@/composables/useLogout'
+import {useStore} from 'vuex'
+import {useToast} from 'vue-toastification'
 
 export default {
   setup () {
     const password = ref(null);
     const email = ref(null);
     const banner = ref(null)
+    const toast = useToast();
+    const store = useStore();
 
     //init
     const {user,isAdmin,loadUser} = getUser();
@@ -69,25 +73,28 @@ export default {
     const {error : error2, login} = useLogin();
     const {error : error3, logout} = useLogout();
 
-
     const handleLogin = async ()=>{
       await login(email.value, password.value);
       if(!error2.value){
-        console.log("login successful");
+        toast.success(`Log in successful`);
       }
     }
-
+    onMounted(()=>{
+      toast.success(`Welcome Back ${user.value.displayName}`);
+    });
     watchEffect(()=>{
-      if(!user.value){
-        banner.value = `Welcome ${user.value}`
-        console.log(banner.value );
+      if(user.value !== null){
+        console.log(user.value);
+        store.dispatch('setCurrentUser',{user:user.value});
       }
     })
+
     const handleSignup = async()=>{
       console.log("signup");
        await signup(email.value,password.value);
       if(!error.value){
         console.log("signup successful");
+        toast.success("welcome to the game :))");
       }
     }
 
@@ -95,7 +102,8 @@ export default {
       await logout();
       if(!error3.value){
         user.value = null;
-        console.log("logout successful");
+        toast.success("Logout Successful");
+
       }
     }
     return {password, email ,handleLogin, handleSignup,user,loadUser,handleLogout}
