@@ -34,12 +34,12 @@
           </div>
           <div class="game-counter">
             <h1 class="counter-title">TIME</h1>
-            <h1 class="counter-number">16</h1>
+            <h1 class="counter-number">{{timeCount}}</h1>
             <img class="counter-box" src="@/assets/images/box_empty.png">
           </div>
           <div class="game-counter">
             <h1 class="counter-title">STEP</h1>
-            <h1 class="counter-number">16</h1>
+            <h1 class="counter-number">{{stepCount}}</h1>
             <img class="counter-box" src="@/assets/images/box_empty.png">
           </div>
           <div class="game-controller">
@@ -55,8 +55,10 @@
 
 <script>
 // @ is an alias to /src
-import {onMounted, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import Overworld from '@/class/Overworld'
+import {store} from '@/store/index' 
+import {useToast} from 'vue-toastification'
 export default {
   name: 'Game',
     components: {
@@ -64,18 +66,65 @@ export default {
   },
   props:['id'],
   setup(props,context){
+    const toast = useToast();
+
     //DOM
     const canvas = ref(null);
     const gameContainer = ref(null);
+    
+
+    //gameData
+    const timeCount = ref(null);
+    const stepCount = computed(()=> store.getters('event/getStep'))
+    const map = ref(null);
+    const minSteps = ref(null);
+    const maxSteps = ref(null);
+    const overworldEvent = ref(null);
+    const event = computed(()=>store.getters('event/getEvent'));
+    
+
+    const loadgame = (map)=>{
+      minSteps.value = map.value.minSteps;
+      maxSteps.value = map.value.maxSteps;
+      timeCount.value = map.value.timeLimit;
+    }
+
+    const startGame = ()=>{
+        const overworld = new Overworld({
+          mapID : props.id,
+          element: gameContainer.value,
+          canvas: canvas.value, 
+          overworldEvent : overworldEvent.value
+        })
+        overworld.init();
+
+        //start countDown
+        const countdown = setInterval(()=>{
+          if(timeCount.value > 0)
+          timeCount.value--;
+          else {
+            clearInterval(countdown);
+            endGame("time");
+          };
+        },1000);
+    }
+
 
     onMounted(()=>{
-      const overworld = new Overworld({
-        mapID : props.id,
-        element: gameContainer.value,
-        canvas: canvas.value
-      })
-      overworld.init();
+      //load game
+      map.value = store.getters['gameData/getMap'](props.id);
+      loadgame(map.value);
+      //startGame
+      startGame();
     })
+
+    const endGame = ()=> {
+    
+    }
+
+
+
+
 
     return {canvas,gameContainer}
   }
@@ -233,10 +282,11 @@ img{
     justify-content: space-between;
     &>*{
       width: 30%;
+      
     }
     & .btn{
       &-sound{
-
+        
       }
       &-exit{
 

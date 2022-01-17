@@ -7,6 +7,41 @@ import getCollection from '../composables/getCollection'
 import getCollectionFilter from '../composables/getCollectionFilter'
 import getDocu from '../composables/getDoc'
 
+const moduleEvents = {
+  namespaced: true,
+  state: {
+    overworldEvent : null,
+    event: null,
+    cause: null,
+    currentStep: 0,
+  },
+  getters: {
+    getEvent(state){
+      return state.event
+    },
+    getCause(state){
+      return state.currentStep;
+    },
+    getStep(state){
+      return state.currentStep;
+    }
+  },
+  actions: {
+    resetEvent({state}){
+      state.overworldEvent = null;
+      state.event = null;
+      state.currentStep = 0;
+      state.cause = null
+    },
+    setEvent({state}, {event,cause}){
+      state.event = event;
+      cause.event = cause;
+    },
+    incrementStep({state}){
+      ++state.currentStep;
+    }
+  }
+}
 
 const moduleGameData = {
   namespaced: true,
@@ -111,7 +146,7 @@ export const store =  createStore({
   state: {
     currentUser: null,
   },
-  getter: {
+  getters: {
     getCurrentUser(state){
       return state.currentUser;
     }
@@ -123,5 +158,6 @@ export const store =  createStore({
   },
   modules: {
     gameData : moduleGameData,
+    event: moduleEvents,
   }
 })

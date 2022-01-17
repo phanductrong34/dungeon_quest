@@ -3,6 +3,10 @@
 // Event nhảy vào ô có quái, hoặc ô quái chiếm khi mà có kiếm
 // hai event phải đều phát hiện được quái tạo ra sự kiện là quái nào, đầy đủ cả class,m tức thằng phát ra sự kiện phải gửi cùng đi
 import utils from './utils'
+import {store} from '@/store/index'
+import {useToast} from 'vue-toastification'
+const toast = useToast()
+
 class OverworldEvent{
     constructor(config){
         this.map = config.map
@@ -38,8 +42,12 @@ class OverworldEvent{
     }
 
     eventGoal(){
-        alert("YOU WINN");
+        toast.success("Yon Won");
         this.map.isPlaying = false;
+        store.dispatch("event/setEvent", {
+            event: 'win',
+            cause: null,
+        })
     }
 
     eventMonster(){
@@ -50,6 +58,10 @@ class OverworldEvent{
             {x: this.currentX, y: this.currentY},
             {x: this.currentMonster.x, y : this.currentMonster.y}
         )
+        store.dispatch('event/setEvent',{
+            event: 'die',
+            cause: this.currentMonster.name
+        })
 
     }
     eventTrap(){
@@ -63,12 +75,20 @@ class OverworldEvent{
                 {x: this.currentX, y: this.currentY},
                 {x: this.currentMonster.x, y : this.currentMonster.y}
             )
+            store.dispatch('event/setEvent',{
+                event: 'die',
+                cause: this.currentMonster.name
+            })
         }
     }
 
     eventSword(){
         this.map.deleteSword(this.currentX,this.currentY);
         this.who.pickSword();
+        store.dispatch('event/setEvent',{
+            event: 'pickSword',
+            cause: null
+        })
     }
 
     // handle các event nhặt kiếm, dính trap, dính monster
@@ -116,6 +136,12 @@ class OverworldEvent{
         await new Promise((resolve) => {this.countDown(resolve)} )
         this.map.deleteMonsterAndTrap(this.currentMonster.x,this.currentMonster.y);
         this.who.hasSword = false;
+
+        store.dispatch('event/setEvent',{
+            event: 'dropSword',
+            cause: null
+        })
+
         this.who.startBehavior(
             {
                 map: this.map
