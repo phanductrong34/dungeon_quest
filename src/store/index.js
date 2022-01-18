@@ -35,7 +35,7 @@ const moduleEvents = {
     },
     setEvent({state}, {event,cause}){
       state.event = event;
-      cause.event = cause;
+      state.cause = cause;
     },
     incrementStep({state}){
       ++state.currentStep;
@@ -60,11 +60,21 @@ const moduleGameData = {
                 name: 'hero',
                 x: 1,
                 y: 1
+              },
+              {
+                name: 'sword',
+                x: 2,
+                y: 2
+              },
+              {
+                name: 'redMon',
+                x: 3,
+                y: 2
               }
             ],
             minSteps: 10,
             maxSteps:20,
-            timeLimit: 30
+            timeLimit: 10
         }
               
       },

@@ -42,7 +42,6 @@ class OverworldEvent{
     }
 
     eventGoal(){
-        toast.success("Yon Won");
         this.map.isPlaying = false;
         store.dispatch("event/setEvent", {
             event: 'win',
@@ -99,11 +98,7 @@ class OverworldEvent{
         this.currentX = this.who.x;
         this.currentY = this.who.y;
 
-        const checkGoal = this.map.isSpaceGoal(this.currentX,this.currentY);
-        if(checkGoal){
-            this.eventGoal();
-            return;
-        }
+
 
         const checkMon = this.map.isSpaceMonster(this.currentX,this.currentY)
         if(checkMon){
@@ -113,12 +108,17 @@ class OverworldEvent{
             return;
         }
 
+        const checkGoal = this.map.isSpaceGoal(this.currentX,this.currentY);
+        if(checkGoal){
+            this.eventGoal();
+        }
+
         const checkSwords = this.map.isSpaceSword(this.currentX,this.currentY)
         if(checkSwords){
             this.eventSword()
-            return;
         }
-        
+        //tăng tiến step lên 1
+        store.dispatch('event/incrementStep');
     }
 
     async eventKillMonster(e){

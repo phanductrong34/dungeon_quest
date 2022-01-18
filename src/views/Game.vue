@@ -1,8 +1,17 @@
 <template>
-  <div class="game-title">
-    <img src="@/assets/images/map_title.png" alt="">
-  </div>
+
+  <ModalGame
+      :isPlaying="isPlaying"
+      :timeLeft="timeLeft"
+      :timeCount="timeCount"
+      :stepCount="stepCount"
+      :star="star" 
+      :type="event"/>
+
   <div class="game-pad">
+      <div class="game-title">
+        <img src="@/assets/images/map_title.png" alt="">
+      </div>
       <div class="game-content">
         <div class="game-left">
             <div class="game-stage">
@@ -11,7 +20,7 @@
               <img class="stage-jew" src="@/assets/images/jew.png" alt="">
             </div>
             <div class="game-sword">
-              <img class="sword-img" src="@/assets/images/sword.png" alt="">
+              <img v-if="hasSword" class="sword-img" src="@/assets/images/sword.png" alt="">
               <img class="sword-box" src="@/assets/images/box_sword.png" alt="">
               <h1 class="sword-title">SWORD</h1>
             </div>
@@ -55,14 +64,15 @@
 
 <script>
 // @ is an alias to /src
-import {computed, onMounted, ref} from 'vue'
+import ModalGame from '@/components/ModalGame.vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import Overworld from '@/class/Overworld'
 import {store} from '@/store/index' 
 import {useToast} from 'vue-toastification'
 export default {
   name: 'Game',
     components: {
-   
+      ModalGame
   },
   props:['id'],
   setup(props,context){
@@ -75,18 +85,28 @@ export default {
 
     //gameData
     const timeCount = ref(null);
-    const stepCount = computed(()=> store.getters('event/getStep'))
+    const timeLeft = ref(0)
+    const stepCount = computed(()=> store.getters['event/getStep'])
     const map = ref(null);
     const minSteps = ref(null);
     const maxSteps = ref(null);
+    const hasSword = ref(false);
     const overworldEvent = ref(null);
-    const event = computed(()=>store.getters('event/getEvent'));
-    
+    const event = computed(()=>store.getters['event/getEvent']);
+    const cause = computed(()=>store.getters['event/getCause']);
+    const isPlaying = ref(true);
+    const star = ref(null);
+    let countdown = null
 
     const loadgame = (map)=>{
-      minSteps.value = map.value.minSteps;
-      maxSteps.value = map.value.maxSteps;
-      timeCount.value = map.value.timeLimit;
+      store.dispatch('event/resetEvent');
+      isPlaying.value = true;
+      star.value = null;
+      countdown = null;
+      minSteps.value = map.minSteps;
+      maxSteps.value = map.maxSteps;
+      timeCount.value = map.timeLimit;
+      timeLeft.value = 0
     }
 
     const startGame = ()=>{
@@ -99,7 +119,7 @@ export default {
         overworld.init();
 
         //start countDown
-        const countdown = setInterval(()=>{
+        countdown = setInterval(()=>{
           if(timeCount.value > 0)
           timeCount.value--;
           else {
@@ -109,6 +129,40 @@ export default {
         },1000);
     }
 
+    const endGame = (type)=> {
+      isPlaying.value = false;
+      clearInterval(countdown);
+      if(type == 'die'){
+
+      }else if(type == 'time'){
+        
+      }else if(type == 'win'){
+          //quyết định số sao
+          if(stepCount.value <= minSteps.value){
+            star.value = 3;
+          }else if(minSteps.value < stepCount.value && stepCount.value < maxSteps.value){
+            star.value = 2
+          }else{
+            star.value = 1;
+          }
+          console.log(star.value);
+      }
+      timeLeft.value = map.value.timeLimit - timeCount.value;
+    }
+
+    // watch biến sự kiện để trigger thứ phù hợp
+    watch(event, ()=>{
+      if(event.value == 'pickSword'){
+          hasSword.value = true;
+      }else if(event.value == 'dropSword'){
+          hasSword.value = false;
+      }else if(event.value == 'win'){
+        endGame('win');
+      }else if(event.value == 'die'){
+        endGame('die');
+      }
+    })
+    
 
     onMounted(()=>{
       //load game
@@ -118,21 +172,14 @@ export default {
       startGame();
     })
 
-    const endGame = ()=> {
-    
-    }
 
-
-
-
-
-    return {canvas,gameContainer}
+    return {canvas,gameContainer,timeCount,stepCount,hasSword,
+            isPlaying,star,timeLeft,event}
   }
 }
 </script>
 
 <style lang="scss" scoped>
-
 
 img{
    image-rendering: pixelated;
@@ -145,7 +192,6 @@ img{
     position: absolute;
     @include center-1;
     z-index: -99;
-    top: 28rem;
   }
   &-content{
     position: absolute;
@@ -168,7 +214,7 @@ img{
     position: absolute;
     @include center-1;
     z-index: -99;
-    top: 4rem;
+    top: -6%;
     transform: translate(-50%, -50%) scale(0.8);
     user-select: none;
   }
