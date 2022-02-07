@@ -6,7 +6,9 @@
       :timeCount="timeCount"
       :stepCount="stepCount"
       :star="star" 
-      :type="event"/>
+      :type="event"
+      @replayGame="replayGame"
+      @nextLevel="nextLevel"/>
 
   <div class="game-pad">
       <div class="game-title">
@@ -16,7 +18,7 @@
         <div class="game-left">
             <div class="game-stage">
               <h1 class="stage-title">STAGE</h1>
-              <h1 class="stage-number">11</h1>
+              <h1 v-if="levelNo" class="stage-number">{{levelNo}}</h1>
               <img class="stage-jew" src="@/assets/images/jew.png" alt="">
             </div>
             <div class="game-sword">
@@ -67,8 +69,11 @@
 import ModalGame from '@/components/ModalGame.vue'
 import {computed, onMounted, ref, watch} from 'vue'
 import Overworld from '@/class/Overworld'
+import DirectionInput from '@/class/DirectionInput'
 import {store} from '@/store/index' 
 import {useToast} from 'vue-toastification'
+import {useRouter} from 'vue-router'
+  
 export default {
   name: 'Game',
     components: {
@@ -77,6 +82,8 @@ export default {
   props:['id'],
   setup(props,context){
     const toast = useToast();
+    const router = useRouter();
+
 
     //DOM
     const canvas = ref(null);
@@ -92,32 +99,32 @@ export default {
     const maxSteps = ref(null);
     const hasSword = ref(false);
     const overworldEvent = ref(null);
+    const overworld = ref(null)
     const event = computed(()=>store.getters['event/getEvent']);
     const cause = computed(()=>store.getters['event/getCause']);
     const isPlaying = ref(true);
     const star = ref(null);
+    const directionInput = ref(null);
     let countdown = null
+    const levelNo = ref(null)
 
-    const loadgame = (map)=>{
-      store.dispatch('event/resetEvent');
-      isPlaying.value = true;
+
+    const resetData = ()=>{
+      timeCount.value = null;
+      timeLeft.value = 0
+      minSteps.value = null;
+      maxSteps.value = null;
+      hasSword.value = false;
       star.value = null;
       countdown = null;
-      minSteps.value = map.minSteps;
-      maxSteps.value = map.maxSteps;
-      timeCount.value = map.timeLimit;
-      timeLeft.value = 0
+      store.dispatch('event/resetEvent');
     }
 
-    const startGame = ()=>{
-        const overworld = new Overworld({
-          mapID : props.id,
-          element: gameContainer.value,
-          canvas: canvas.value, 
-          overworldEvent : overworldEvent.value
-        })
-        overworld.init();
-
+    const startGame = (map)=>{
+        minSteps.value = map.minSteps;
+        maxSteps.value = map.maxSteps;
+        timeCount.value = map.timeLimit;
+        isPlaying.value = true;
         //start countDown
         countdown = setInterval(()=>{
           if(timeCount.value > 0)
@@ -131,11 +138,18 @@ export default {
 
     const endGame = (type)=> {
       isPlaying.value = false;
+      overworld.value.endGame();
       clearInterval(countdown);
       if(type == 'die'){
-
+        store.dispatch('gameData/setUserGameRecord',{
+          type: 'lose',
+          mapId: props.id
+        })
       }else if(type == 'time'){
-        
+        store.dispatch('gameData/setUserGameRecord',{
+          type: 'lose',
+          mapId: props.id
+        })
       }else if(type == 'win'){
           //quyết định số sao
           if(stepCount.value <= minSteps.value){
@@ -146,6 +160,15 @@ export default {
             star.value = 1;
           }
           console.log(star.value);
+
+          //ghi nhận kết quả record lên firebase thông qua store
+          store.dispatch('gameData/setUserGameRecord',{
+            type: 'win',
+            stars: star.value,
+            steps: stepCount.value,
+            time:  map.value.timeLimit - timeCount.value,
+            mapId: props.id
+          })
       }
       timeLeft.value = map.value.timeLimit - timeCount.value;
     }
@@ -163,18 +186,49 @@ export default {
       }
     })
     
-
+    //Ban đầu lúc vào game
     onMounted(()=>{
-      //load game
+      console.log("MOUNTEDDDDDD");
+      resetData();
+      directionInput.value = new DirectionInput(); 
+      directionInput.value.init();
+
+      //load data game : level/map
       map.value = store.getters['gameData/getMap'](props.id);
-      loadgame(map.value);
-      //startGame
-      startGame();
+      levelNo.value = map.value.no;
+      //tạo module game từ data để chạy lần đầu
+      overworld.value = new Overworld({
+        mapID : props.id,
+        element: gameContainer.value,
+        canvas: canvas.value, 
+        overworldEvent : overworldEvent.value,
+        directionInput: directionInput.value
+      })
+      overworld.value.init();
+
+      //Màn hình ready start kich hoạt ở đây
+
+      startGame(map.value);
     })
 
+    //Chơi lại game
+    const replayGame = ()=>{
+      resetData();
+      overworld.value.replay();
+      directionInput.value.init();
+      startGame(map.value);
+    }
+
+
+    const nextLevel = ()=>{
+      const nextId  = store.getters['gameData/getNextMapId'](props.id);
+      console.log(nextId);
+      router.push({name: 'Game', params: {id: nextId}});
+    }
 
     return {canvas,gameContainer,timeCount,stepCount,hasSword,
-            isPlaying,star,timeLeft,event}
+            isPlaying,star,timeLeft,event,
+            replayGame,nextLevel,map,levelNo}
   }
 }
 </script>

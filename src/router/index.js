@@ -5,7 +5,9 @@ import Game from '../views/Game.vue'
 import Admin from '../views/Admin.vue'
 import Sprite from '../views/Sprite.vue'
 import { useRoute } from 'vue-router'
+import {store} from '@/store/index' 
 const route = useRoute();
+
 
 const routes = [
   {
@@ -22,7 +24,12 @@ const routes = [
     path: '/game/:id',
     props: true,
     name: 'Game',
-    component: Game
+    component: Game,
+    beforeEnter: (to, from, next)=>{
+      if(!from.name ||  store.getters['gameData/getMap'](to.params.id) == null){
+        next({name: 'Menu'})
+      }else next();
+    }
   },
   {
     path: '/admin',

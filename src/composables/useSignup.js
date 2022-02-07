@@ -1,4 +1,5 @@
-import {auth,createUserWithEmailAndPassword,updateProfile} from '../firebase/config'
+import {auth,createUserWithEmailAndPassword,updateProfile,
+       collection,doc,setDoc,db} from '../firebase/config'
 import {ref} from 'vue'
 
 const error = ref(null)
@@ -15,6 +16,11 @@ const signup = async (email,password) =>{
       const username = email.slice(0,email.indexOf('@'));
       await updateProfile(userCredential.user,{
           displayName: username
+      })
+      await setDoc(doc(db,'users',email), {
+          username: username,
+          email: email,
+          role: 'user'
       })
 
     } catch (err) {

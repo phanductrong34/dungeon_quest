@@ -1,5 +1,12 @@
 <template>
+
     <div class="menu">
+            <transition name="fade">
+                <div class="loading" v-if="isLoading">
+                    <img class="loading_gif" src="@/assets/loop/running_loop.gif" alt="">
+                    <img class="loading_background" src="@/assets/images/board.png" alt="">
+                </div>
+            </transition>
             <img class="menu_background" src="@/assets/images/board.png" alt="">
             <div class="menu_content">
                     <div class="menu_title">
@@ -16,22 +23,17 @@
                                 <div class="level_wrapper" v-for="(level,index) in pageMap" :key="level.id" @click="startGame(level.id)">
                                     <div class="level_content">
                                         <h2 class="level_number">{{index + 1}}</h2>
-                                        <span class="level_rate" v-if="maps[index].isPlayed && getStar(index) == 0">
-                                            <img class="level_star" src="@/assets/images/star_small_off.png" alt="">
-                                            <img class="level_star" src="@/assets/images/star_small_off.png" alt="">
-                                            <img class="level_star" src="@/assets/images/star_small_off.png" alt="">
-                                        </span>
-                                        <span class="level_rate" v-if="maps[index].isPlayed && getStar(index) == 1">
+                                        <span class="level_rate" v-if="getStar(level.id) == 1">
                                             <img class="level_star" src="@/assets/images/star_small_on.png" alt="">
                                             <img class="level_star" src="@/assets/images/star_small_off.png" alt="">
                                             <img class="level_star" src="@/assets/images/star_small_off.png" alt="">
                                         </span>
-                                        <span class="level_rate" v-if="maps[index].isPlayed && getStar(index) == 2">
+                                        <span class="level_rate" v-if="getStar(level.id) == 2">
                                             <img class="level_star" src="@/assets/images/star_small_on.png" alt="">
                                             <img class="level_star" src="@/assets/images/star_small_on.png" alt="">
                                             <img class="level_star" src="@/assets/images/star_small_off.png" alt="">
                                         </span>
-                                        <span class="level_rate" v-if="maps[index].isPlayed && getStar(index) == 3">
+                                        <span class="level_rate" v-if="getStar(level.id) == 3">
                                             <img class="level_star" src="@/assets/images/star_small_on.png" alt="">
                                             <img class="level_star" src="@/assets/images/star_small_on.png" alt="">
                                             <img class="level_star" src="@/assets/images/star_small_on.png" alt="">
@@ -51,13 +53,13 @@
                         </div>
                         <div class="menu_button_bottom">
                             <div class="menu_button_bottom_wrapper back">
-                                <h2 class="menu_button_bottom_title">Back</h2>
+                                <h2 class="menu_button_bottom_title" @click="backHome">Back</h2>
                                 <img class="menu_button_bottom_image" src="@/assets/images/button-3.png" alt="">
                             </div>
-                            <div class="menu_button_bottom_wrapper reset">
+                            <!-- <div class="menu_button_bottom_wrapper reset">
                                 <h2 class="menu_button_bottom_title">Reset</h2>
                                 <img class="menu_button_bottom_image" src="@/assets/images/button-3.png" alt="">
-                            </div>
+                            </div> -->
 
                         </div>
                     </div>
@@ -66,23 +68,30 @@
 </template>
 
 <script>
-import {ref,computed, onMounted} from 'vue'
+import {ref,computed, onMounted,watchEffect} from 'vue'
 import {useStore} from 'vuex'
 import {useRouter} from 'vue-router'
 export default {
     setup () {
 
         const store = useStore();
-        const userGameData = ref([]);
-        const allMaps = ref([]);
-        const isLoadAll = ref(false);
+        const userGameData = computed(()=> store.getters['gameData/getUserGameData'] || {});
+        const allMaps = computed(()=>store.getters['gameData/getAllMaps'] || {});
+        const isLoading = ref(true);
 
         onMounted(async()=>{
-            userGameData.value = await store.dispatch('gameData/loadUserGameData');
-            allMaps.value = await store.dispatch('gameData/loadBaseGameData');
-            isLoadAll.value = true;
+            await store.dispatch('gameData/loadUserGameData');
+            await store.dispatch('gameData/loadBaseGameData');
+            console.log("userGameData",userGameData.value);
+            console.log("AllMaps",allMaps.value);
         })
 
+
+        watchEffect(()=>{
+            if(Object.keys(allMaps.value).length > 0){
+                isLoading.value = false;
+            }
+        })
 
         const chapter = ref("1")
         const maps = computed(()=>{
@@ -99,8 +108,12 @@ export default {
 
 
         //HÀM XÁC ĐỊNH SAO SÁNG HAY TẮT
-        const getStar = (index) => {
-            return maps.value[index].stars;
+        const getStar = (id) => {
+            if(!userGameData.value[id]){
+                return 0;
+            }else {
+                return userGameData.value[id].stars;
+            }
         }
 
 
@@ -110,13 +123,41 @@ export default {
             router.push({name: 'Game', params: {id: id} })
         }
 
+        //back
+        const backHome = ()=>{
+            router.push({name: 'Home'})
+        }
 
-        return {chapter,maps,page,pageMap,getStar,startGame}
+
+        return {chapter,maps,page,pageMap,getStar,startGame,isLoading,backHome}
     }
 }
 </script>
 
 <style lang="scss" scoped>
+.fade-leave-to{
+    opacity: 0;
+}
+.fade-leave-active{
+    transition: all 0.5s ease;
+}
+
+.loading{   
+    position:absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    &_gif{
+        position: absolute;
+        @include center-1;
+        width: 30%;
+    }
+    &_background{
+        width: 100%;
+    }
+
+}
+
 img{
     image-rendering: pixelated;
     user-select: none;

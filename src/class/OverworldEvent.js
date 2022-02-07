@@ -35,14 +35,12 @@ class OverworldEvent{
         }else{
             res = [this.who.direction,this.who.direction]
         }
-        console.log(res);
         this.who.direction = res[0];
         this.currentMonster.direction = res[1];
-        console.log(this.currentMonster);
     }
 
     eventGoal(){
-        this.map.isPlaying = false;
+        // this.map.isPlaying = false;
         store.dispatch("event/setEvent", {
             event: 'win',
             cause: null,
@@ -97,28 +95,30 @@ class OverworldEvent{
 
         this.currentX = this.who.x;
         this.currentY = this.who.y;
+        let hasSword = false;
 
-
+        const checkSwords = this.map.isSpaceSword(this.currentX,this.currentY)
+        if(checkSwords){
+            this.eventSword() 
+            hasSword = true;
+        }
 
         const checkMon = this.map.isSpaceMonster(this.currentX,this.currentY)
-        if(checkMon){
+        if(checkMon && hasSword == false){
             // lấy obj quái gây ra cái chết
             this.currentMonster = this.map.getMonsterCause(this.currentX, this.currentY);
             this[checkMon]();
-            return;
         }
 
         const checkGoal = this.map.isSpaceGoal(this.currentX,this.currentY);
         if(checkGoal){
             this.eventGoal();
         }
+        store.dispatch('event/incrementStep');  
 
-        const checkSwords = this.map.isSpaceSword(this.currentX,this.currentY)
-        if(checkSwords){
-            this.eventSword()
-        }
+
         //tăng tiến step lên 1
-        store.dispatch('event/incrementStep');
+        
     }
 
     async eventKillMonster(e){
@@ -164,6 +164,11 @@ class OverworldEvent{
     init(){
         document.addEventListener("PersonWalkingComplete", (e)=> this.eventWalkComplete(e));
         document.addEventListener("PersonKillMonster", (e) => this.eventKillMonster(e));
+    }
+
+    endEvent(){
+        document.removeEventListener("PersonWalkingComplete", (e)=> this.eventWalkComplete(e));
+        document.removeEventListener("PersonKillMonster", (e) => this.eventKillMonster(e));
     }
 }
 

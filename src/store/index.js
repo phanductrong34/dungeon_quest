@@ -5,7 +5,11 @@ import Person from '../class/Person';
 import ObjectAnimated from '../class/ObjectAnimated';
 import getCollection from '../composables/getCollection'
 import getCollectionFilter from '../composables/getCollectionFilter'
+import useCollection from '../composables/useCollection'
 import getDocu from '../composables/getDoc'
+import {useToast} from 'vue-toastification'
+
+const toast = useToast();
 
 const moduleEvents = {
   namespaced: true,
@@ -28,6 +32,7 @@ const moduleEvents = {
   },
   actions: {
     resetEvent({state}){
+      console.log('resetEvent');
       state.overworldEvent = null;
       state.event = null;
       state.currentStep = 0;
@@ -38,7 +43,7 @@ const moduleEvents = {
       state.cause = cause;
     },
     incrementStep({state}){
-      ++state.currentStep;
+      state.currentStep+=1;
     }
   }
 }
@@ -47,35 +52,41 @@ const moduleGameData = {
   namespaced: true,
   state:{
       lowerSrc: "../assets/png/base/testmap.png",
-      userGameData: [],
+      defaultWall: [[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0],
+                    [0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,8],
+                    [1,9],[2,9],[3,9],[4,9],[5,9],[6,9],[7,9],[8,9],
+                    [9,1],[9,2],[9,3],[9,4],[9,5],[9,6],[9,7],[9,8]]
+                    ,
+      userGameData: {},
       allMaps:{
-        'id':{
-            gameObjects: [
-              {
-                name: 'goal',
-                x: 5,
-                y: 0
-              },
-              {
-                name: 'hero',
-                x: 1,
-                y: 1
-              },
-              {
-                name: 'sword',
-                x: 2,
-                y: 2
-              },
-              {
-                name: 'redMon',
-                x: 3,
-                y: 2
-              }
-            ],
-            minSteps: 10,
-            maxSteps:20,
-            timeLimit: 10
-        }
+        // 'id':{
+        //     no: 10,
+        //     gameObjects: [
+        //       {
+        //         name: 'goal',
+        //         x: 5,
+        //         y: 0
+        //       },
+        //       {
+        //         name: 'hero',
+        //         x: 1,
+        //         y: 1
+        //       },
+        //       {
+        //         name: 'sword',
+        //         x: 2,
+        //         y: 2
+        //       },
+        //       {
+        //         name: 'redMon',
+        //         x: 3,
+        //         y: 2
+        //       }
+        //     ],
+        //     minSteps: 10,
+        //     maxSteps:20,
+        //     timeLimit: 10
+        // }
               
       },
   },
@@ -83,6 +94,7 @@ const moduleGameData = {
     getMap : (state) => (id) => {
       const curMap = state.allMaps[id];
       const formatGameObject = [];
+      let goalPos = [0,0];
 
       curMap.gameObjects.forEach(obj => {
         const objId = `${obj.name}_${utils.toPixels(obj.x)}_${utils.toPixels(obj.y)}`;
@@ -92,12 +104,19 @@ const moduleGameData = {
               x: utils.toPixels(obj.x), // số nguyên đc chuyển thành tọa độ pixel qua hàm withGrid
               y: utils.toPixels(obj.y)
             })
-        }else if(["redMon",'greenMon','whiteMon','goal'].includes(obj.name)){
+        }else if(["redMon",'greenMon','whiteMon'].includes(obj.name)){
           formatGameObject[objId] = new ObjectAnimated({
             spriteName: obj.name,
             x: utils.toPixels(obj.x), // số nguyên đc chuyển thành tọa độ pixel qua hàm withGrid
             y: utils.toPixels(obj.y)
           })
+        }else if(obj.name == 'goal'){
+          formatGameObject[objId] = new ObjectAnimated({
+            spriteName: obj.name,
+            x: utils.toPixels(obj.x), // số nguyên đc chuyển thành tọa độ pixel qua hàm withGrid
+            y: utils.toPixels(obj.y)
+          })
+          goalPos = [obj.x,obj.y];
         }
         else{
             formatGameObject[objId] =  new GameObject({
@@ -107,6 +126,21 @@ const moduleGameData = {
             })
         }
 
+        // thêm wall vào xung quanh map
+        const goalIndex = state.defaultWall.findIndex((wall) =>{
+          return wall[0] == goalPos[0] && wall[1] == goalPos[1]
+        })
+        let tempArray = [...state.defaultWall];
+        tempArray.splice(goalIndex,1)
+
+        tempArray.forEach((wall,index) => {
+          formatGameObject[`wall-${wall[0]}-${wall[1]}`] =  new GameObject({
+            spriteName: "wall",
+            x: utils.toPixels(wall[0]), // số nguyên đc chuyển thành tọa độ pixel qua hàm withGrid
+            y: utils.toPixels(wall[1])
+          })
+        })
+
       })
 
       const sortedMap = {
@@ -114,9 +148,30 @@ const moduleGameData = {
         gameObject : formatGameObject,
         minSteps: curMap.minSteps,
         maxSteps: curMap.maxSteps,
-        timeLimit: curMap.timeLimit
+        timeLimit: curMap.timeLimit,
+        no: curMap.no
       }
       return sortedMap;
+    },
+    getAllMaps(state){
+        return state.allMaps
+    },
+    getUserGameData(state){
+        return state.userGameData
+    },
+    getNextMapId: (state) => (id) =>{
+      const currentMapNo = state.allMaps[id].no;
+      const allMapsArr = Object.keys(state.allMaps)
+      
+      let nextMapId;
+      for (let i = 0; i < allMapsArr.length; i ++){
+        const curMap = state.allMaps[allMapsArr[i]];
+        if (curMap.no == currentMapNo + 1){
+          nextMapId = allMapsArr[i]
+          break;
+        }
+      }
+      return nextMapId;
     }
     
   },
@@ -130,8 +185,9 @@ const moduleGameData = {
       const {dataArray, error : err, load} = getCollection('maps');
       await load();
       if(!err.value && dataArray.value.length > 0){
-        dataArray.value.forEach(map => {
+        dataArray.value.forEach((map,index) => {
           state.allMaps[map.id] = map;
+          state.allMaps[map.id].no = index + 1
         })
         console.log("logggggg",state.allMaps);
         return state.allMaps;
@@ -142,12 +198,50 @@ const moduleGameData = {
       if(state.userGameData.length > 0) return state.userGameData;
 
       const {dataArray, error : err, load} = getCollectionFilter('records');
-      await load('userID',rootState.currentUser.id);
+      await load('userId',rootState.currentUser.id);
       if(!err.value && dataArray.value.length > 0){
-        state.userGameData = dataArray;
+        dataArray.value.forEach(rec => {
+          state.userGameData[rec.mapId] = rec;
+        })
+        console.log(state.userGameData);
         return state.userGameData
-      }else return [];
+      }else return {};
+    },
+
+    async setUserGameRecord({state,rootState},record){
+      if(record.type == 'lose') return;
+
+      const {error, addDocument,setDocument} = useCollection('records');
+      const newRecord = {...record, userId : rootState.currentUser.user.email};
+      // kiểm tra đã tồn tại record cho màn này chưa để ghi đè lên
+      
+      if(!state.userGameData[record.mapId]){ //nếu là màn mới chưa tồn tại
+        const res = await addDocument(newRecord);     
+        // ghi vào kho offline
+        if(!error.value){
+          console.log("add record success", res);
+          state.userGameData[record.mapId] = {...record,id: res.id};
+          console.log(newRecord);
+        }
+      }else if(record.steps <= state.userGameData[record.mapId].steps && record.time < state.userGameData[record.mapId].time){ // nếu là màn đã tồn tại record và record mới phải có kết quả tốt hơn về số bước hoặc số thời gian
+        toast.success("New Record !!")
+        const recordId = state.userGameData[record.mapId].id;
+        console.log("hehe",state.userGameData[record.mapId]);
+        await setDocument(newRecord,recordId);
+          // ghi vào kho offline
+          if(!error.value){
+            console.log("set record success");
+            state.userGameData[record.mapId] = {...record, id: recordId};
+            console.log(newRecord);
+            
+          }
+      }else{
+        console.log("new record is not good enought");
+      }
+
     }
+
+
   }
 }
 

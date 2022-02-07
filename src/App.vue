@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <router-view/>
+    <router-view :key="$route.path"/>
     <div class="background"></div>
   </div>
 </template>

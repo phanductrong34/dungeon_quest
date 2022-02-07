@@ -61,6 +61,10 @@ const spriteSrc = {
     sword:{
         src: "../assets/png/sword/weapon_red_gem_sword.png",
         offset: [11,0]
+    },
+    wall:{
+        src:"",
+        offset: [0,0]
     }
 }
 

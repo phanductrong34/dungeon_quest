@@ -13,7 +13,7 @@ import {store} from '@/store/index'
 import {ref,computed} from 'vue'
 import DirectionInput from './DirectionInput'
 import OverworldEvent from './OverworldEvent'
-
+import _ from "lodash" 
 
 class Overworld {
  constructor(config) {
@@ -21,6 +21,8 @@ class Overworld {
    this.canvas = this.element.querySelector(".game-canvas");
    this.ctx = this.canvas.getContext("2d");
    this.mapID = config.mapID;
+   this.directionInput = config.directionInput;
+   this.toggleInput = config.directionInput;
    this.map = null; //ban đầu khởi tạo bằng 0, sau đó khi init sẽ gán 1 Overworldmap và chạy hàm loop để vẽ
  }
 
@@ -42,7 +44,7 @@ class Overworld {
         return a.y - b.y
       }).forEach(object=>{;
         object.update({
-          arrow: this.directionInput.direction,
+          arrow: _.get(this.toggleInput,'direction'),
           map: this.map
         })
         object.sprite.draw(this.ctx)
@@ -58,7 +60,7 @@ class Overworld {
 
  init() {
   //const curMap = store.getters['gameData/getMap'](this.mapID);
-  const curMap = store.getters['gameData/getMap']('id');
+  const curMap = store.getters['gameData/getMap'](this.mapID);
 
   this.map = new OverworldMap(curMap);
   this.overworldEvent = new OverworldEvent({
@@ -68,15 +70,22 @@ class Overworld {
   this.map.mountedObject();
   this.overworldEvent.init();
 
-  // Khởi tạo class nhận input
-  this.directionInput = new DirectionInput();
-  this.directionInput.init();
-
-  this.directionInput.direction; // hàm getter, trả về phần tử đầu tiên của mảng input
-
-
   this.startGameLoop();
 
+ }
+
+ replay(){
+  const curMap = store.getters['gameData/getMap'](this.mapID);
+  this.overworldEvent.endEvent();
+  this.toggleInput = this.directionInput;
+  this.map = new OverworldMap(curMap);
+  this.map.mountedObject();
+  this.isPlaying = true;
+ }
+
+ endGame() {
+  this.isPlaying = false;
+  this.toggleInput = null
  }
 
 }

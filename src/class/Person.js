@@ -109,6 +109,9 @@ class Person extends GameObject {
         if(this.isHit) return;
 
         const [property, change] = this.directionUpdate[this.direction];
+        // if(this[property]+change <=128  && this[property]+change >= 0){
+        //     this[property] += change;
+        // }
         this[property] += change;
         this.movingProgressRemaining -= 1;
 
