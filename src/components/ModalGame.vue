@@ -44,14 +44,14 @@
                 </div>
                 <h3 class="win-comment">{{comment}}</h3>
                 <div class="win-footer">
-                    <div class="btn-wrapper" @click="nextLevel">
+                    <!-- <div class="btn-wrapper" @click="nextLevel">
                         <h2 class="btn-name">Next</h2>
                         <img class="btn-img" src="@/assets/images/button-3.png" alt="">
-                    </div>
-                    <div class="btn-wrapper" @click="replayGame">
+                    </div> -->
+                    <!-- <div class="btn-wrapper" @click="replayGame">
                         <h2 class="btn-name">Replay</h2>
                         <img class="btn-img" src="@/assets/images/button-3.png" alt="">
-                    </div>
+                    </div> -->
                     <div class="btn-wrapper" @click="backMenu">
                         <h2 class="btn-name">Menu</h2>
                         <img class="btn-img" src="@/assets/images/button-3.png" alt="">

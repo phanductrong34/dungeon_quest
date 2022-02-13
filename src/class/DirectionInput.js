@@ -1,7 +1,7 @@
 class DirectionInput {
-    constructor(){
+    constructor(config){
         this.heldDirections = []; 
-
+        this.voiceMode = config.voiceMode;
         this.map = {
             "ArrowUp": "up",
             "KeyW": "up",
@@ -18,20 +18,38 @@ class DirectionInput {
         return this.heldDirections[0];
     }
     keydownFunc(e){
-        const dir = this.map[e.code];
-
-        //nếu hướng mới hợp lệ và  chưa có trong mảng thì thêm vào
-        if(dir && this.heldDirections.indexOf(dir) === -1){
-            this.heldDirections.unshift(dir);
-            //console.log(this.heldDirections);
+        if(!this.voiceMode){
+            const dir = this.map[e.code];
+            this.pushDir(dir);
         }
     }
     keyupFunc(e){
-        const dir = this.map[e.code];
+        if(!this.voiceMode){
+            const dir = this.map[e.code];
+            this.removeDir(dir)
+        }
+    }
+    
+
+    pushDir(dir){
+        //nếu hướng mới hợp lệ và  chưa có trong mảng thì thêm vào
+        if(dir && this.heldDirections.indexOf(dir) === -1){
+            this.heldDirections.unshift(dir);
+        }
+        console.log("push" + this.heldDirections, dir);
+    }
+    removeDir(dir){
         const index = this.heldDirections.indexOf(dir);
         if(index > -1){
-            this.heldDirections.splice(index,1)
+            this.heldDirections.splice(index,1);
         }
+        console.log("remove" + this.heldDirections, dir);
+    }
+
+
+    //voiceMode
+    setVoiceMode(){
+        this.voiceMode = true;
     }
 
     init(){

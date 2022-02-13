@@ -18,6 +18,8 @@ const moduleEvents = {
     event: null,
     cause: null,
     currentStep: 0,
+    walkTrigger: false,
+    voiceMode: true,
   },
   getters: {
     getEvent(state){
@@ -28,6 +30,12 @@ const moduleEvents = {
     },
     getStep(state){
       return state.currentStep;
+    },
+    getWalkTrigger(state){
+      return state.walkTrigger
+    },
+    getVoiceMode(state){
+      return state.voiceMode
     }
   },
   actions: {
@@ -42,8 +50,19 @@ const moduleEvents = {
       state.event = event;
       state.cause = cause;
     },
+    toggleVoiceMode({state}){
+      state.voiceMode = !state.voiceMode;
+    },
     incrementStep({state}){
       state.currentStep+=1;
+    },
+    triggerWalk({state}){
+      state.walkTrigger = true;
+      // console.log("walkTrigger true");
+      setTimeout(()=>{
+        state.walkTrigger = false;
+        // console.log("walkTrigger false");
+      },10)
     }
   }
 }
@@ -89,6 +108,7 @@ const moduleGameData = {
         // }
               
       },
+      directionalInput: null
   },
   getters:{
     getMap : (state) => (id) => {
@@ -172,6 +192,13 @@ const moduleGameData = {
         }
       }
       return nextMapId;
+    },
+    getDirectionInput(state){
+      if(!state.directionalInput){ // nếu chưa có
+        
+      }else{ // nếu có rồi
+
+      }
     }
     
   },

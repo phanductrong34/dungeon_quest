@@ -53,8 +53,11 @@
             <h1 class="counter-number">{{stepCount}}</h1>
             <img class="counter-box" src="@/assets/images/box_empty.png">
           </div>
-          <div class="game-controller">
+          <div v-if="!voiceMode" class="game-controller">
             <img src="@/assets/images/controller.png" alt="">
+          </div>
+          <div v-else class="voice-controller">
+            <VoiceControl :directionInput="directionInput" :key="voiceKey"/>
           </div>
 
         </div>
@@ -67,6 +70,7 @@
 <script>
 // @ is an alias to /src
 import ModalGame from '@/components/ModalGame.vue'
+import VoiceControl from '@/components/VoiceControl.vue'
 import {computed, onMounted, ref, watch} from 'vue'
 import Overworld from '@/class/Overworld'
 import DirectionInput from '@/class/DirectionInput'
@@ -77,12 +81,13 @@ import {useRouter} from 'vue-router'
 export default {
   name: 'Game',
     components: {
-      ModalGame
+      ModalGame,VoiceControl
   },
   props:['id'],
   setup(props,context){
     const toast = useToast();
     const router = useRouter();
+  
 
 
     //DOM
@@ -106,7 +111,10 @@ export default {
     const star = ref(null);
     const directionInput = ref(null);
     let countdown = null
-    const levelNo = ref(null)
+    const levelNo = ref(null);
+    const voiceKey = ref(0);
+
+    const voiceMode = computed(()=>store.getters['event/getVoiceMode']);
 
 
     const resetData = ()=>{
@@ -118,6 +126,7 @@ export default {
       star.value = null;
       countdown = null;
       store.dispatch('event/resetEvent');
+      voiceKey.value += 1;
     }
 
     const startGame = (map)=>{
@@ -190,7 +199,9 @@ export default {
     onMounted(()=>{
       console.log("MOUNTEDDDDDD");
       resetData();
-      directionInput.value = new DirectionInput(); 
+      directionInput.value = new DirectionInput({
+        voiceMode: voiceMode.value
+      }); 
       directionInput.value.init();
 
       //load data game : level/map
@@ -202,7 +213,8 @@ export default {
         element: gameContainer.value,
         canvas: canvas.value, 
         overworldEvent : overworldEvent.value,
-        directionInput: directionInput.value
+        directionInput: directionInput.value,
+        voiceMode: voiceMode.value
       })
       overworld.value.init();
 
@@ -227,8 +239,8 @@ export default {
     }
 
     return {canvas,gameContainer,timeCount,stepCount,hasSword,
-            isPlaying,star,timeLeft,event,
-            replayGame,nextLevel,map,levelNo}
+            isPlaying,star,timeLeft,event,voiceMode,directionInput,
+            replayGame,nextLevel,map,levelNo,voiceKey}
   }
 }
 </script>
@@ -422,5 +434,11 @@ img{
   &-controller{
   
   }
+}
+
+
+.voice-controller{
+  position: relative;
+  height:50%;
 }
 </style>

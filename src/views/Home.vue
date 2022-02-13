@@ -6,10 +6,10 @@
         <h1 class="nav-content">Start</h1>
         <img class="nav-img" src="@/assets/images/button-2.png" alt="">
       </router-link>
-      <div class="nav-button">
-        <h1 class="nav-content">Tutorial</h1>
+      <router-link class="nav-button" :to="{name:'Admin'}">
+        <h1 class="nav-content">Map Maker</h1>
         <img class="nav-img" src="@/assets/images/button-2.png" alt="">
-      </div>
+      </router-link>
       <div class="nav-button" @click="handleLogout">
         <h1 class="nav-content">Log out</h1>
         <img class="nav-img" src="@/assets/images/button-2.png" alt="">

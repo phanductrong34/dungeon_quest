@@ -56,10 +56,10 @@
                                 <h2 class="menu_button_bottom_title" @click="backHome">Back</h2>
                                 <img class="menu_button_bottom_image" src="@/assets/images/button-3.png" alt="">
                             </div>
-                            <!-- <div class="menu_button_bottom_wrapper reset">
-                                <h2 class="menu_button_bottom_title">Reset</h2>
+                            <div class="menu_button_bottom_wrapper reset">
+                                <h2 class="menu_button_bottom_title" @click="toggleMode">{{controlMode}}</h2>
                                 <img class="menu_button_bottom_image" src="@/assets/images/button-3.png" alt="">
-                            </div> -->
+                            </div>
 
                         </div>
                     </div>
@@ -78,6 +78,7 @@ export default {
         const userGameData = computed(()=> store.getters['gameData/getUserGameData'] || {});
         const allMaps = computed(()=>store.getters['gameData/getAllMaps'] || {});
         const isLoading = ref(true);
+        const controlMode = ref("Voice");
 
         onMounted(async()=>{
             await store.dispatch('gameData/loadUserGameData');
@@ -128,8 +129,16 @@ export default {
             router.push({name: 'Home'})
         }
 
-
-        return {chapter,maps,page,pageMap,getStar,startGame,isLoading,backHome}
+        //change Mode
+        const toggleMode = ()=>{
+            if(controlMode.value == "Voice"){
+                controlMode.value = "Arrow"
+            }else{
+                controlMode.value = "Voice"
+            }
+            store.dispatch('event/toggleVoiceMode');
+        }
+        return {chapter,maps,page,pageMap,getStar,startGame,isLoading,backHome,controlMode,toggleMode}
     }
 }
 </script>

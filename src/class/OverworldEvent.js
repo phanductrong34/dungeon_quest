@@ -90,6 +90,7 @@ class OverworldEvent{
 
     // handle các event nhặt kiếm, dính trap, dính monster
     eventWalkComplete(e){
+
         this.map = e.detail.map;
         this.who = e.detail.who;
 
@@ -115,7 +116,7 @@ class OverworldEvent{
             this.eventGoal();
         }
         store.dispatch('event/incrementStep');  
-
+        store.dispatch('event/triggerWalk');
 
         //tăng tiến step lên 1
         
